@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace BusinessLogicLayer.Models
 {
-    interface IFigure
+    public interface IFigure
     {
         Point Position { get; set; }
         bool IsWhite { get; set; }

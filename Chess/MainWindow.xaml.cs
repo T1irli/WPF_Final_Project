@@ -1,6 +1,8 @@
-﻿using BusinessLogicLayer.Services;
+﻿using BusinessLogicLayer.Models;
+using BusinessLogicLayer.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +34,7 @@ namespace Chess
 
         private void FillGameboard()
         {
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 gameboardGrid.RowDefinitions.Add(new RowDefinition());
                 gameboardGrid.ColumnDefinitions.Add(new ColumnDefinition());
@@ -44,41 +46,22 @@ namespace Chess
 
             for (int i = 1; i < 9; i++)
             {
-                for(int j = 1; j < 9; j++)
+                for (int j = 1; j < 9; j++)
                 {
-                    var grid = new Grid() { 
-                        Background =  new SolidColorBrush(((i + j) % 2 == 0? 
-                        Color.FromArgb(255, 238, 238, 238) : Color.FromArgb(255, 122, 62, 62)))
+                    var grid = new Grid() {
+                        Background = new SolidColorBrush(((i + j) % 2 == 0 ?
+                        Color.FromArgb(255, 238, 238, 238) : Color.FromArgb(255, 122, 62, 62))),
                     };
-                    grid.MouseEnter += (s, e) =>
-                    {
-                        if (selectedFigure != null)
-                        {
-                            grid.Children.Clear();
-                            tempCanvas.Children.Remove(selectedFigure);
-                            
-                            var endPos = new System.Drawing.Point(Grid.GetColumn(grid) - 1, Grid.GetRow(grid) - 1);
-                            if (ChessGame.CanMove(startPos, endPos))
-                            {
-                                grid.Children.Add(selectedFigure);
-                                ChessGame.Move(startPos, endPos);
-                            }
-                            else
-                                startGrid.Children.Add(selectedFigure);
 
-                            RefreshBoard();
-                            startGrid = null;
-                            selectedFigure = null;
-                        }
-                    };
-                    
+                    grid.MouseEnter += gridMouseEnter;
+
                     gameboardGrid.Children.Add(grid);
                     Grid.SetColumn(grid, j);
                     Grid.SetRow(grid, i);
                 }
             }
 
-            for(int i = 1; i < 9; i++)
+            for (int i = 1; i < 9; i++)
             {
                 var textNum = new TextBlock() { Text = i.ToString() };
                 var textLetter = new TextBlock() { Text = ((char)('a' + (i - 1))).ToString() };
@@ -88,6 +71,30 @@ namespace Chess
                 gameboardGrid.Children.Add(textLetter);
                 Grid.SetRow(textLetter, 0);
                 Grid.SetColumn(textLetter, i);
+            }
+        }
+
+        private void gridMouseEnter(object sender, MouseEventArgs e)
+        {
+            if (selectedFigure != null)
+            {
+                tempCanvas.Children.Remove(selectedFigure);
+
+                var endPos = new System.Drawing.Point(Grid.GetColumn((sender as Grid)) - 1, Grid.GetRow((sender as Grid)) - 1);
+                if (ChessGame.CanMove(startPos, endPos))
+                {
+                    (sender as Grid).Children.Clear();
+                    (sender as Grid).Children.Add(selectedFigure);
+                    ChessGame.Move(startPos, endPos);
+                }
+                else
+                {
+                    startGrid.Children.Add(selectedFigure);
+                }
+
+                RefreshBoard();
+                startGrid = null;
+                selectedFigure = null;
             }
         }
 
@@ -103,31 +110,44 @@ namespace Chess
             }
         }
 
+        private void AddFigure(string path, Point point)
+        {
+            Image pawn = new Image()
+            {
+                Margin = new Thickness(10),
+                Source = new BitmapImage(new Uri(path, UriKind.Relative))
+            };
+            pawn.MouseDown += FigureMouseDown;
+            (gameboardGrid.Children[(int)(point.Y * 8 + point.X)] as Grid).Children.Add(pawn);
+        }
+
         private void SetFigures()
         {
-            Image image = new Image()
+            foreach(var item in ChessGame.WhiteFigures)
             {
-                Margin = new Thickness(10),
-                Source = new BitmapImage(new Uri("/Images/pawn.png", UriKind.Relative))
-            };
-            Image image2 = new Image()
-            {
-                Margin = new Thickness(10),
-                Source = new BitmapImage(new Uri("/Images/knight.png", UriKind.Relative))
-            };
-            Image image3 = new Image()
-            {
-                Margin = new Thickness(10),
-                Source = new BitmapImage(new Uri("/Images/bishop.png", UriKind.Relative))
-            };
-            image.MouseDown += FigureMouseDown;
-            image2.MouseDown += FigureMouseDown;
-            image3.MouseDown += FigureMouseDown;
+                string path = "";
+                if (item is Pawn) path = "pawn";
+                else if (item is Tower) path = "tower";
+                else if (item is Bishop) path = "bishop";
+                else if (item is Knight) path = "knight";
+                else if (item is Queen) path = "queen";
+                else if (item is King) path = "king";
 
-            // Test
-            (gameboardGrid.Children[6 * 8 + 3] as Grid).Children.Add(image);
-            (gameboardGrid.Children[4 * 8 + 4] as Grid).Children.Add(image2);
-            (gameboardGrid.Children[1 * 8 + 2] as Grid).Children.Add(image3);
+                AddFigure($"/Images/{path}.png", new Point(item.Position.X, item.Position.Y));
+            }
+
+            foreach (var item in ChessGame.BlackFigures)
+            {
+                string path = "";
+                if (item is Pawn) path = "b_pawn";
+                else if (item is Tower) path = "b_tower";
+                else if (item is Bishop) path = "b_bishop";
+                else if (item is Knight) path = "b_knight";
+                else if (item is Queen) path = "b_queen";
+                else if (item is King) path = "b_king";
+
+                AddFigure($"/Images/{path}.png", new Point(item.Position.X, item.Position.Y));
+            }
         }
 
         private void FigureMouseDown(object sender, MouseEventArgs e)
@@ -140,11 +160,29 @@ namespace Chess
             {
                 (gameboardGrid.Children[(p.Y) * 8 + p.X] as Grid).Background = Brushes.Yellow;
             }
+            var attacks = ChessGame.GetAttacks(startPos);
+            foreach (var p in attacks)
+            {
+                (gameboardGrid.Children[(p.Y) * 8 + p.X] as Grid).Background = Brushes.Red;
+            }
 
             selectedFigure = (sender as Image);
 
             Panel.SetZIndex(tempCanvas, 1);
-            (selectedFigure.Parent as Grid).Children.Clear();
+            startGrid.Children.Clear();
+            var grid = new Grid()
+            {
+                Background = startGrid.Background
+            };
+            grid.MouseEnter += gridMouseEnter;
+            int c = Grid.GetColumn(startGrid);
+            int r = Grid.GetRow(startGrid);
+            int index = gameboardGrid.Children.IndexOf(startGrid);
+            gameboardGrid.Children.RemoveAt(index);
+            gameboardGrid.Children.Insert(index, grid);
+            Grid.SetColumn(grid, c);
+            Grid.SetRow(grid, r);
+            startGrid = grid;
             tempCanvas.Children.Add(selectedFigure);
             Canvas.SetLeft(selectedFigure, Math.Abs(e.GetPosition(tempCanvas).X - 10));
             Canvas.SetTop(selectedFigure, Math.Abs(e.GetPosition(tempCanvas).Y - 10));
@@ -153,8 +191,8 @@ namespace Chess
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             FillGameboard();
-            SetFigures();
             ChessGame.StartGame();
+            SetFigures();
         }
 
         private void tempCanvas_MouseMove(object sender, MouseEventArgs e)

@@ -23,10 +23,11 @@ namespace BusinessLogicLayer.Models
 
         public List<List<Point>> GetMoves()
         {
+            int direction = IsWhite ? 1 : -1;
             if (moveCount == 0)
-                return new List<List<Point>>() { new List<Point>(){ new Point(Position.X, Position.Y-1), 
-                    new Point(Position.X, Position.Y - 2), } };
-            else return new List<List<Point>>() { new List<Point>(){ new Point(Position.X, Position.Y-1) } };
+                return new List<List<Point>>() { new List<Point>(){ new Point(Position.X, Position.Y-(direction)), 
+                    new Point(Position.X, Position.Y - (direction * 2)), } };
+            else return new List<List<Point>>() { new List<Point>(){ new Point(Position.X, Position.Y-(direction)) } };
         }
     }
 }
