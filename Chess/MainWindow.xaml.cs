@@ -194,8 +194,6 @@ namespace Chess
         {
             FillGameboard();
             timeTextBlock.Text = $"{gameTime} min";
-            //ChessGame.StartGame();
-            //SetFigures();
         }
 
         private void tempCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -221,6 +219,14 @@ namespace Chess
         {
             gameTime = Math.Max(gameTime - 5, 5);
             timeTextBlock.Text = $"{gameTime} min";
+        }
+
+        private void playButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            settingGrid.Visibility = Visibility.Hidden;
+            playGrid.Visibility = Visibility.Visible;
+            ChessGame.StartGame();
+            SetFigures();
         }
     }
 }

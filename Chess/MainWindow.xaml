@@ -47,7 +47,8 @@
         <Grid Grid.Column="0" Margin="30" Background="#482121"
               x:Name="gameboardGrid">
         </Grid>
-        <Grid Grid.Column="1" Background="#482121">
+        <Grid Grid.Column="1" Background="#482121" x:Name="settingGrid"
+              Visibility="Visible">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
@@ -74,7 +75,8 @@
                     </StackPanel>
                 </Grid>
             </Border>
-            <Border Grid.Row="2" Style="{StaticResource Button}" Padding="10">
+            <Border Grid.Row="2" Style="{StaticResource Button}" Padding="10"
+                    x:Name="playButton" MouseLeftButtonUp="playButton_MouseLeftButtonUp">
                 <TextBlock TextAlignment="Center" FontSize="36"
                            FontWeight="Medium">Play</TextBlock>
             </Border>
@@ -82,6 +84,70 @@
                        TextAlignment="Center" Style="{StaticResource HighlightedText}"
                        >Read rules</TextBlock>
         </Grid>
+        <Grid Grid.Column="1" Background="#482121" x:Name="playGrid"
+              Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.3*"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="0.3*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="0.7*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource BorderButton}" CornerRadius="5"
+                    Background="#7A3E3E" Margin="20, 10, 10, 20">
+                    <WrapPanel>
+                    </WrapPanel>
+                </Border>
+                <Border Style="{StaticResource BorderButton}"
+                    Background="#7A3E3E" Grid.Column="1" Margin="0, 10, 20, 20">
+                    <Viewbox>
+                        <TextBlock>11:20</TextBlock>
+                    </Viewbox>
+                </Border>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Auto">
+                <StackPanel  Background="#7A3E3E">
+                
+                </StackPanel>
+            </ScrollViewer>
+            
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="0.7*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource BorderButton}" CornerRadius="5"
+                    Background="#7A3E3E" Margin="20, 10, 10, 20">
+                    <WrapPanel>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/pawn.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/tower.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/tower.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/bishop.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/bishop.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/knight.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/knight.png"></Image>
+                        <Image Height="25" Width="25" Source="/Images/queen.png"></Image>
+                    </WrapPanel>
+                </Border>
+                <Border Style="{StaticResource BorderButton}"
+                    Background="#7A3E3E" Grid.Column="1" Margin="0, 10, 20, 20">
+                    <Viewbox>
+                        <TextBlock>11:20</TextBlock>
+                    </Viewbox>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
-    
 </Window>
