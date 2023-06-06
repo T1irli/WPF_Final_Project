@@ -27,6 +27,8 @@ namespace Chess
         private System.Drawing.Point startPos;
         private Grid startGrid = null;
 
+        private int gameTime = 15;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -191,8 +193,9 @@ namespace Chess
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             FillGameboard();
-            ChessGame.StartGame();
-            SetFigures();
+            timeTextBlock.Text = $"{gameTime} min";
+            //ChessGame.StartGame();
+            //SetFigures();
         }
 
         private void tempCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -206,6 +209,18 @@ namespace Chess
         {
             if (selectedFigure == null) return;
             Panel.SetZIndex(tempCanvas, -1);
+        }
+
+        private void upNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            gameTime = Math.Min(gameTime + 5, 30);
+            timeTextBlock.Text = $"{gameTime} min";
+        }
+
+        private void downNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            gameTime = Math.Max(gameTime - 5, 5);
+            timeTextBlock.Text = $"{gameTime} min";
         }
     }
 }
