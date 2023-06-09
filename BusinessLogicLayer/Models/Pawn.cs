@@ -9,22 +9,15 @@ namespace BusinessLogicLayer.Models
 {
     public class Pawn : IFigure
     {
-        private int moveCount = -1;
-        private Point position;
+        public bool FirstMove = true;
 
-        public Point Position { get => position;
-            set
-            {
-                position = value;
-                moveCount++;
-            }
-        }
+        public Point Position { get; set; }
         public bool IsWhite { get; set; }
 
         public List<List<Point>> GetMoves()
         {
             int direction = IsWhite ? 1 : -1;
-            if (moveCount == 0)
+            if (FirstMove)
                 return new List<List<Point>>() { new List<Point>(){ new Point(Position.X, Position.Y-(direction)), 
                     new Point(Position.X, Position.Y - (direction * 2)), } };
             else return new List<List<Point>>() { new List<Point>(){ new Point(Position.X, Position.Y-(direction)) } };

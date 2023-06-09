@@ -1,10 +1,14 @@
 ﻿using BusinessLogicLayer.Models;
 using BusinessLogicLayer.Services;
+using Chess.Commands;
+using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,11 +31,10 @@ namespace Chess
         private System.Drawing.Point startPos;
         private Grid startGrid = null;
 
-        private int gameTime = 15;
-
         public MainWindow()
         {
             InitializeComponent();
+            ChessGame.GameStarting += StartGameCommand;
         }
 
         private void FillGameboard()
@@ -88,6 +91,24 @@ namespace Chess
                     (sender as Grid).Children.Clear();
                     (sender as Grid).Children.Add(selectedFigure);
                     ChessGame.Move(startPos, endPos);
+                    if(ChessGame.ToweringPos != null)
+                    {
+                        var towerPoint = new Point(ChessGame.ToweringPos.Value.X, ChessGame.ToweringPos.Value.Y);
+                        if(towerPoint.X == 2)
+                        {
+                            var towerImg = ((gameboardGrid.Children[(int)(towerPoint.Y * 8 + 0)] as Grid).Children[0] as Image);
+                            (gameboardGrid.Children[(int)(towerPoint.Y * 8 + 0)] as Grid).Children.Remove(towerImg);
+                            (gameboardGrid.Children[(int)(towerPoint.Y * 8 + 2)] as Grid).Children.Add(towerImg);
+                            (gameboardGrid.Children[(int)(towerPoint.Y * 8 + 0)] as Grid).Children.Clear();
+                        }
+                        else if(towerPoint.X == 5)
+                        {
+                            var towerImg = ((gameboardGrid.Children[(int)(towerPoint.Y * 8 + 7)] as Grid).Children[0] as Image);
+                            (gameboardGrid.Children[(int)(towerPoint.Y * 8 + 7)] as Grid).Children.Remove(towerImg);
+                            (gameboardGrid.Children[(int)(towerPoint.Y * 8 + 5)] as Grid).Children.Add(towerImg);
+                            (gameboardGrid.Children[(int)(towerPoint.Y * 8 + 7)] as Grid).Children.Clear();
+                        }
+                    }
                 }
                 else
                 {
@@ -110,16 +131,27 @@ namespace Chess
                         Color.FromArgb(255, 238, 238, 238) : Color.FromArgb(255, 122, 62, 62)));
                 }
             }
+
+            if (ChessGame.IsCheck(out System.Drawing.Point position))
+            {
+                (gameboardGrid.Children[position.Y * 8 + position.X] as Grid).Background = Brushes.Red;
+                if (ChessGame.IsCheckMate(position))
+                {
+                    MessageBox.Show("Win");
+                }
+            }
         }
 
-        private void AddFigure(string path, Point point)
+        private void AddFigure(string path, Point point, bool isWhite = true)
         {
             Image pawn = new Image()
             {
                 Margin = new Thickness(10),
                 Source = new BitmapImage(new Uri(path, UriKind.Relative))
             };
-            pawn.MouseDown += FigureMouseDown;
+            if(isWhite)
+                pawn.MouseDown += WhiteFigureMouseDown;
+            else pawn.MouseDown += BlackFigureMouseDown;
             (gameboardGrid.Children[(int)(point.Y * 8 + point.X)] as Grid).Children.Add(pawn);
         }
 
@@ -127,29 +159,29 @@ namespace Chess
         {
             foreach(var item in ChessGame.WhiteFigures)
             {
-                string path = "";
-                if (item is Pawn) path = "pawn";
-                else if (item is Tower) path = "tower";
-                else if (item is Bishop) path = "bishop";
-                else if (item is Knight) path = "knight";
-                else if (item is Queen) path = "queen";
-                else if (item is King) path = "king";
+                string path = ChessConverter.ConvertFigureToSource(item);
 
                 AddFigure($"/Images/{path}.png", new Point(item.Position.X, item.Position.Y));
             }
 
             foreach (var item in ChessGame.BlackFigures)
             {
-                string path = "";
-                if (item is Pawn) path = "b_pawn";
-                else if (item is Tower) path = "b_tower";
-                else if (item is Bishop) path = "b_bishop";
-                else if (item is Knight) path = "b_knight";
-                else if (item is Queen) path = "b_queen";
-                else if (item is King) path = "b_king";
+                string path = ChessConverter.ConvertFigureToSource(item);
 
-                AddFigure($"/Images/{path}.png", new Point(item.Position.X, item.Position.Y));
+                AddFigure($"/Images/{path}.png", new Point(item.Position.X, item.Position.Y), false);
             }
+        }
+
+        private void WhiteFigureMouseDown(object sender, MouseEventArgs e)
+        {
+            if (!ChessGame.WhiteTurn) return;
+            FigureMouseDown(sender, e);
+        }
+
+        private void BlackFigureMouseDown(object sender, MouseEventArgs e)
+        {
+            if (ChessGame.WhiteTurn) return;
+            FigureMouseDown(sender, e);
         }
 
         private void FigureMouseDown(object sender, MouseEventArgs e)
@@ -193,7 +225,6 @@ namespace Chess
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             FillGameboard();
-            timeTextBlock.Text = $"{gameTime} min";
         }
 
         private void tempCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -209,23 +240,8 @@ namespace Chess
             Panel.SetZIndex(tempCanvas, -1);
         }
 
-        private void upNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void StartGameCommand(object sender, EventArgs e)
         {
-            gameTime = Math.Min(gameTime + 5, 30);
-            timeTextBlock.Text = $"{gameTime} min";
-        }
-
-        private void downNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            gameTime = Math.Max(gameTime - 5, 5);
-            timeTextBlock.Text = $"{gameTime} min";
-        }
-
-        private void playButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            settingGrid.Visibility = Visibility.Hidden;
-            playGrid.Visibility = Visibility.Visible;
-            ChessGame.StartGame();
             SetFigures();
         }
     }

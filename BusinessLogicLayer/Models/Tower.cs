@@ -11,6 +11,7 @@ namespace BusinessLogicLayer.Models
     {
         public Point Position { get; set; }
         public bool IsWhite { get; set; }
+        public bool FirstMove = true;
 
         public List<List<Point>> GetMoves()
         {
