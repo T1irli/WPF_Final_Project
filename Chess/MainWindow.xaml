@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chess.ViewModels"
-        xmlns:commands="clr-namespace:Chess.Commands"
         mc:Ignorable="d"
         Title="Chess" Height="650" Width="900" MinHeight="650" MinWidth="900" 
         Loaded="Window_Loaded">
@@ -33,5 +32,24 @@
 
         <Frame Grid.Column="1" x:Name="mainFrame" NavigationUIVisibility="Hidden"
                Content="{Binding CurrentPage}"></Frame>
+
+        <Popup x:Name="choicePopup"
+               AllowsTransparency="True"
+               Placement="MousePoint"
+               StaysOpen="True">
+            <Border CornerRadius="10" Background="#482121" Margin="10">
+                <WrapPanel MinWidth="250" Image.MouseUp="ChangePawn_MouseUp">
+                <Image Height="50" Width="50" Margin="5"
+                       Source="/Images/knight.png"></Image>
+                <Image Height="50" Width="50" Margin="5"
+                       Source="/Images/tower.png"></Image>
+                <Image Height="50" Width="50" Margin="5"
+                       Source="/Images/bishop.png"></Image>
+                <Image Height="50" Width="50" Margin="5"
+                       Source="/Images/queen.png"></Image>
+            </WrapPanel>
+            </Border>
+            
+        </Popup>
     </Grid>
 </Window>

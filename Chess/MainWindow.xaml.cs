@@ -1,6 +1,5 @@
 ﻿using BusinessLogicLayer.Models;
 using BusinessLogicLayer.Services;
-using Chess.Commands;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
@@ -29,12 +28,40 @@ namespace Chess
     {
         private Image selectedFigure = null;
         private System.Drawing.Point startPos;
+        private System.Drawing.Point endPos;
         private Grid startGrid = null;
 
         public MainWindow()
         {
             InitializeComponent();
             ChessGame.GameStarting += StartGameCommand;
+            ChessGame.BoardSetted += SetBoardForRuls;
+        }
+
+        private void CleanBoard()
+        {
+            foreach(var grid in gameboardGrid.Children)
+            {
+                if (grid is Grid)
+                    (grid as Grid).Children.Clear();
+            }
+            RefreshBoard();
+        }
+
+        private void SetBoardForRuls(object sender, EventArgs e)
+        {
+            var list = (sender as List<IFigure>);
+            CleanBoard();
+
+            list.ForEach(f =>
+            {
+                string path = $"/Images/{ChessConverter.ConvertFigureToSource(f)}.png";
+                AddFigure(path, new Point(f.Position.X, f.Position.Y), f.IsWhite);
+                
+                foreach(var p in ChessGame.GetMoves(f.Position)) {
+                    (gameboardGrid.Children[(p.Y) * 8 + p.X] as Grid).Background = Brushes.Yellow;
+                }
+            });
         }
 
         private void FillGameboard()
@@ -85,13 +112,17 @@ namespace Chess
             {
                 tempCanvas.Children.Remove(selectedFigure);
 
-                var endPos = new System.Drawing.Point(Grid.GetColumn((sender as Grid)) - 1, Grid.GetRow((sender as Grid)) - 1);
+                endPos = new System.Drawing.Point(Grid.GetColumn((sender as Grid)) - 1, Grid.GetRow((sender as Grid)) - 1);
                 if (ChessGame.CanMove(startPos, endPos))
                 {
                     (sender as Grid).Children.Clear();
                     (sender as Grid).Children.Add(selectedFigure);
                     ChessGame.Move(startPos, endPos);
-                    if(ChessGame.ToweringPos != null)
+                    if(selectedFigure.Source.ToString().Contains("pawn") && endPos.Y == 0 || endPos.Y == 7)
+                    {
+                        choicePopup.IsOpen = true;
+                    }
+                    else if(ChessGame.ToweringPos != null)
                     {
                         var towerPoint = new Point(ChessGame.ToweringPos.Value.X, ChessGame.ToweringPos.Value.Y);
                         if(towerPoint.X == 2)
@@ -186,6 +217,7 @@ namespace Chess
 
         private void FigureMouseDown(object sender, MouseEventArgs e)
         {
+            if (choicePopup.IsOpen) return;
             startGrid = (sender as Image).Parent as Grid;
             startPos = new System.Drawing.Point(Grid.GetColumn((sender as Image).Parent as Grid) - 1,
                 Grid.GetRow((sender as Image).Parent as Grid) - 1);
@@ -243,6 +275,24 @@ namespace Chess
         private void StartGameCommand(object sender, EventArgs e)
         {
             SetFigures();
+        }
+
+        private void ChangePawn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            choicePopup.IsOpen = false;
+            var image = (e.Source as Image).Source.ToString();
+            IFigure figure;
+            if (image.Contains("queen"))
+                figure = new Queen();
+            else if (image.Contains("bishop"))
+                figure = new Bishop();
+            else if (image.Contains("knight"))
+                figure = new Knight();
+            else figure = new Tower();
+
+            ChessGame.ChangePawn(endPos, figure);
+            ((gameboardGrid.Children[endPos.Y * 8 + endPos.X] as Grid).Children[0] as Image).Source =
+                new BitmapImage(new Uri($"/Images/{ChessConverter.ConvertFigureToSource(figure)}.png", UriKind.Relative));
         }
     }
 }

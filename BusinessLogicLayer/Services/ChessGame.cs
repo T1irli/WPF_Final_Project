@@ -24,12 +24,42 @@ namespace BusinessLogicLayer.Services
         public static event EventHandler GameStarting;
         public static event EventHandler BlackKilled;
         public static event EventHandler WhiteKilled;
+        public static event EventHandler BoardSetted;
 
         static ChessGame()
         {
             board = new IFigure[8,8];
             WhiteFigures = new List<IFigure>();
             BlackFigures = new List<IFigure>();
+        }
+
+        public static void SetBoard(List<IFigure> figures)
+        {
+            for (int i = 2; i < 6; i++)
+                for (int j = 0; j < 8; j++)
+                    board[i, j] = null;
+
+            figures.ForEach(f => board[f.Position.X, f.Position.Y] = f);
+
+            if(BoardSetted != null)
+                BoardSetted.Invoke(figures, null);
+        }
+
+        public static void ChangePawn(Point position, IFigure figure)
+        {
+            figure.Position = position; 
+            figure.IsWhite = board[position.X, position.Y].IsWhite;
+            if (figure.IsWhite)
+            {
+                WhiteFigures.Remove(board[position.X, position.Y]);
+                WhiteFigures.Add(figure);
+            }
+            else
+            {
+                BlackFigures.Remove(board[position.X, position.Y]);
+                BlackFigures.Add(figure);
+            }
+            board[position.X, position.Y] = figure;
         }
 
         public static bool CanMove(Point start, Point end) => GetMoves(start).Contains(end) || GetAttacks(start).Contains(end);

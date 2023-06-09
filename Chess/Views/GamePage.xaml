@@ -36,8 +36,7 @@
             </Style.Triggers>
         </Style>
     </Page.Resources>
-    <Grid Grid.Column="1" Background="#482121" x:Name="playGrid"
-              Visibility="Visible">
+    <Grid Background="#482121" x:Name="playGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="0.3*"></RowDefinition>
                 <RowDefinition></RowDefinition>

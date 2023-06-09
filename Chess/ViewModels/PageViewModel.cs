@@ -1,5 +1,4 @@
 ﻿using BusinessLogicLayer.Services;
-using Chess.Commands;
 using Chess.Views;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -22,6 +21,7 @@ namespace Chess.ViewModels
 
         private MainPage mainPage;
         private GamePage gamePage;
+        private RulesPage rulesPage;
         private Page currentPage;
 
         public Page CurrentPage
@@ -36,9 +36,23 @@ namespace Chess.ViewModels
 
         public ICommand StartGame
         {
-            get => new StartCommand((obj) => {
+            get => new RelayCommand(() => {
                 CurrentPage = gamePage;
                 ChessGame.StartGame();
+            });
+        }
+
+        public ICommand OpenRules
+        {
+            get => new RelayCommand(() => {
+                CurrentPage = rulesPage;
+            });
+        }
+
+        public ICommand GoBack
+        {
+            get => new RelayCommand(() => {
+                CurrentPage = mainPage;
             });
         }
 
@@ -46,8 +60,11 @@ namespace Chess.ViewModels
         {
             mainPage = new MainPage();
             gamePage = new GamePage();
+            rulesPage = new RulesPage();
 
             mainPage.playButton.Command = StartGame;
+            mainPage.rulesTextBlock.InputBindings.Add(new MouseBinding() { Command = OpenRules, MouseAction = MouseAction.LeftClick });
+            rulesPage.backArrow.InputBindings.Add(new MouseBinding() { Command = GoBack, MouseAction = MouseAction.LeftClick });
             CurrentPage = mainPage;
         }
 

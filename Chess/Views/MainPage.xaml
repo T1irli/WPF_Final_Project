@@ -3,7 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:Chess.Commands"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="300"
       Background="#482121">
@@ -50,8 +49,7 @@
         </Style>
     </Page.Resources>
     
-    <Grid Grid.Column="1" Background="#482121" x:Name="settingGrid"
-              Visibility="Visible">
+    <Grid Background="#482121" x:Name="settingGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
@@ -78,12 +76,14 @@
                 </StackPanel>
             </Grid>
         </Border>
-        <Border Grid.Row="2" Style="{StaticResource Button}" Padding="10">
-            <Button FontSize="36" FontWeight="Medium" Style="{StaticResource noSelectButtonStyle}"
+        <Border Grid.Row="2" Style="{StaticResource Button}">
+            <Button  Style="{StaticResource noSelectButtonStyle}"
                     Foreground="White" x:Name="playButton" BorderThickness="0"
-                       >Play</Button>
+                    Width="250" Height="60">
+                <TextBlock FontSize="36" FontWeight="Medium">Play</TextBlock>
+            </Button>
         </Border>
-        <TextBlock Grid.Row="4" Margin="20, 15" FontSize="24"
+        <TextBlock Grid.Row="4" Margin="20, 15" FontSize="24" x:Name="rulesTextBlock"
                        TextAlignment="Center" Style="{StaticResource HighlightedText}"
                        >Read rules</TextBlock>
     </Grid>
