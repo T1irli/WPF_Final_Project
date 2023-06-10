@@ -23,6 +23,21 @@
             <ColumnDefinition Width="2*"></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Opacity="1" Background="#A0000000" Panel.ZIndex="1"
+              Visibility="Hidden" x:Name="winnerPanel" MouseUp="winnerPanel_MouseUp">
+            <Border Margin="100, 200" CornerRadius="20" Background="#7A3E3E">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0" Source="/Images/king.png" 
+                           x:Name="winImg" Margin="15"></Image>
+                    <TextBlock Grid.Row="1" x:Name="winText" FontSize="18"></TextBlock>
+                </Grid>
+            </Border>
+            
+        </Grid>
         <Canvas Grid.Column="0" Background="Transparent" x:Name="tempCanvas"
                 MouseMove="tempCanvas_MouseMove"
                 MouseUp="tempCanvas_MouseUp"></Canvas>

@@ -55,19 +55,29 @@
                 <Border Style="{StaticResource BorderButton}"
                     Background="#7A3E3E" Grid.Column="1" Margin="0, 10, 20, 20">
                     <Viewbox>
-                        <TextBlock>11:20</TextBlock>
+                        <TextBlock x:Name="bTimeTextBlock">11:20</TextBlock>
                     </Viewbox>
                 </Border>
             </Grid>
 
-            <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Auto">
-                <StackPanel  Background="#7A3E3E">
-                
-                </StackPanel>
-            </ScrollViewer>
-            
 
-            <Grid Grid.Row="2">
+        <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Auto"
+                      x:Name="logScrollViewer">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Background="#7A3E3E" x:Name="whiteLogList">
+                </StackPanel>
+                <StackPanel Background="#7A3E3E" x:Name="blackLogList"
+                            Grid.Column="1">
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+        
+
+        <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition Width="0.7*"></ColumnDefinition>
@@ -80,7 +90,7 @@
                 <Border Style="{StaticResource BorderButton}"
                     Background="#7A3E3E" Grid.Column="1" Margin="0, 10, 20, 20">
                     <Viewbox>
-                        <TextBlock>11:20</TextBlock>
+                    <TextBlock x:Name="wTimeTextBlock">11:20</TextBlock>
                     </Viewbox>
                 </Border>
             </Grid>

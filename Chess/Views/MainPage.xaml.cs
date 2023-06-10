@@ -20,23 +20,24 @@ namespace Chess.Views
     /// </summary>
     public partial class MainPage : Page
     {
-        private int gameTime = 15;
+        public int GameTime { get; set; }
 
         public MainPage()
         {
             InitializeComponent();
+            GameTime = 15;
         }
 
         private void upNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            gameTime = Math.Min(gameTime + 5, 30);
-            timeTextBlock.Text = $"{gameTime} min";
+            GameTime = Math.Min(GameTime + 5, 30);
+            timeTextBlock.Text = $"{GameTime}";
         }
 
         private void downNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            gameTime = Math.Max(gameTime - 5, 5);
-            timeTextBlock.Text = $"{gameTime} min";
+            GameTime = Math.Max(GameTime - 5, 5);
+            timeTextBlock.Text = $"{GameTime}";
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BusinessLogicLayer.Models;
 using BusinessLogicLayer.Services;
+using Chess.ViewModels;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,16 +38,20 @@ namespace Chess
             InitializeComponent();
             ChessGame.GameStarting += StartGameCommand;
             ChessGame.BoardSetted += SetBoardForRuls;
+            ChessGame.GameEnding += (s, e) => ShowWinner((GameState)s);
         }
 
         private void CleanBoard()
         {
-            foreach(var grid in gameboardGrid.Children)
+            for (int i = 0; i < 8; i++)
             {
-                if (grid is Grid)
-                    (grid as Grid).Children.Clear();
+                for (int j = 0; j < 8; j++)
+                {
+                    (gameboardGrid.Children[i * 8 + j] as Grid).Children.Clear();
+                    (gameboardGrid.Children[i * 8 + j] as Grid).Background = new SolidColorBrush(((i + j) % 2 == 0 ?
+                        Color.FromArgb(255, 238, 238, 238) : Color.FromArgb(255, 122, 62, 62)));
+                }
             }
-            RefreshBoard();
         }
 
         private void SetBoardForRuls(object sender, EventArgs e)
@@ -59,7 +65,7 @@ namespace Chess
                 AddFigure(path, new Point(f.Position.X, f.Position.Y), f.IsWhite);
                 
                 foreach(var p in ChessGame.GetMoves(f.Position)) {
-                    (gameboardGrid.Children[(p.Y) * 8 + p.X] as Grid).Background = Brushes.Yellow;
+                    (gameboardGrid.Children[p.Y * 8 + p.X] as Grid).Background = Brushes.Yellow;
                 }
             });
         }
@@ -118,7 +124,7 @@ namespace Chess
                     (sender as Grid).Children.Clear();
                     (sender as Grid).Children.Add(selectedFigure);
                     ChessGame.Move(startPos, endPos);
-                    if(selectedFigure.Source.ToString().Contains("pawn") && endPos.Y == 0 || endPos.Y == 7)
+                    if(selectedFigure.Source.ToString().Contains("pawn") && (endPos.Y == 0 || endPos.Y == 7))
                     {
                         choicePopup.IsOpen = true;
                     }
@@ -166,12 +172,31 @@ namespace Chess
             if (ChessGame.IsCheck(out System.Drawing.Point position))
             {
                 (gameboardGrid.Children[position.Y * 8 + position.X] as Grid).Background = Brushes.Red;
-                if (ChessGame.IsCheckMate(position))
-                {
-                    MessageBox.Show("Win");
-                }
             }
         }
+
+        private void ShowWinner(GameState state)
+        {
+            Task.Delay(1000);
+            winnerPanel.Visibility = Visibility.Visible;
+            Panel.SetZIndex(winnerPanel, 1);
+            if (state == GameState.Draw)
+            {
+                winText.Text = "Draw";
+                winImg.Source = new BitmapImage(new Uri("/Images/drawFigure.png", UriKind.Relative));
+            }
+            else if (state == GameState.White)
+            {
+                winText.Text = "White player wins!";
+                winImg.Source = new BitmapImage(new Uri("/Images/whiteFigure.png", UriKind.Relative));
+            }
+            else if (state == GameState.Black)
+            {
+                winText.Text = "Black player wins!";
+                winImg.Source = new BitmapImage(new Uri("/Images/blackFigure.png", UriKind.Relative));
+            }
+
+        } 
 
         private void AddFigure(string path, Point point, bool isWhite = true)
         {
@@ -181,8 +206,8 @@ namespace Chess
                 Source = new BitmapImage(new Uri(path, UriKind.Relative))
             };
             if(isWhite)
-                pawn.MouseDown += WhiteFigureMouseDown;
-            else pawn.MouseDown += BlackFigureMouseDown;
+                pawn.MouseLeftButtonDown += WhiteFigureMouseDown;
+            else pawn.MouseLeftButtonDown += BlackFigureMouseDown;
             (gameboardGrid.Children[(int)(point.Y * 8 + point.X)] as Grid).Children.Add(pawn);
         }
 
@@ -206,16 +231,16 @@ namespace Chess
         private void WhiteFigureMouseDown(object sender, MouseEventArgs e)
         {
             if (!ChessGame.WhiteTurn) return;
-            FigureMouseDown(sender, e);
+            FigureLeftButtonMouseDown(sender, e);
         }
 
         private void BlackFigureMouseDown(object sender, MouseEventArgs e)
         {
             if (ChessGame.WhiteTurn) return;
-            FigureMouseDown(sender, e);
+            FigureLeftButtonMouseDown(sender, e);
         }
 
-        private void FigureMouseDown(object sender, MouseEventArgs e)
+        private void FigureLeftButtonMouseDown(object sender, MouseEventArgs e)
         {
             if (choicePopup.IsOpen) return;
             startGrid = (sender as Image).Parent as Grid;
@@ -274,6 +299,7 @@ namespace Chess
 
         private void StartGameCommand(object sender, EventArgs e)
         {
+            winnerPanel.Visibility = Visibility.Hidden;
             SetFigures();
         }
 
@@ -293,6 +319,13 @@ namespace Chess
             ChessGame.ChangePawn(endPos, figure);
             ((gameboardGrid.Children[endPos.Y * 8 + endPos.X] as Grid).Children[0] as Image).Source =
                 new BitmapImage(new Uri($"/Images/{ChessConverter.ConvertFigureToSource(figure)}.png", UriKind.Relative));
+        }
+
+        private void winnerPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            winnerPanel.Visibility = Visibility.Hidden;
+            CleanBoard();
+            (this.DataContext as PageViewModel).GoBack.Execute(null);
         }
     }
 }

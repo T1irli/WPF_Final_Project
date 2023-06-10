@@ -38,6 +38,7 @@ namespace Chess.ViewModels
         {
             get => new RelayCommand(() => {
                 CurrentPage = gamePage;
+                gamePage.GameTime = mainPage.GameTime;
                 ChessGame.StartGame();
             });
         }

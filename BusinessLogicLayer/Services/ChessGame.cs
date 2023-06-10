@@ -11,6 +11,13 @@ using System.Net;
 
 namespace BusinessLogicLayer.Services
 {
+    public enum GameState
+    {
+        White,
+        Black,
+        Draw
+    }
+
     public static class ChessGame
     {
         private static IFigure[,] board;
@@ -25,6 +32,14 @@ namespace BusinessLogicLayer.Services
         public static event EventHandler BlackKilled;
         public static event EventHandler WhiteKilled;
         public static event EventHandler BoardSetted;
+        public static event EventHandler FigureMoved;
+        public static event EventHandler GameEnding;
+
+        public static void EndGame(GameState message)
+        {
+            if (GameEnding != null)
+                GameEnding.Invoke(message, null);
+        }
 
         static ChessGame()
         {
@@ -33,9 +48,15 @@ namespace BusinessLogicLayer.Services
             BlackFigures = new List<IFigure>();
         }
 
+        public static void OnFigureMove(IFigure figure)
+        {
+            if (FigureMoved != null)
+                FigureMoved.Invoke(figure, null);
+        }
+
         public static void SetBoard(List<IFigure> figures)
         {
-            for (int i = 2; i < 6; i++)
+            for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
                     board[i, j] = null;
 
@@ -43,6 +64,29 @@ namespace BusinessLogicLayer.Services
 
             if(BoardSetted != null)
                 BoardSetted.Invoke(figures, null);
+        }
+
+        public static bool IsDraw(Point position)
+        {
+            if (board[position.X, position.Y] == null) return false;
+            bool isWhite = !board[position.X, position.Y].IsWhite;
+            if(IsCheck(isWhite)) return false;
+
+            if (isWhite) {
+                foreach (var f in WhiteFigures)
+                {
+                    if (GetMoves(f.Position).Count > 0) return false;
+                }
+            }
+            else
+            {
+                foreach (var f in BlackFigures)
+                {
+                    if (GetMoves(f.Position).Count > 0) return false;
+                }
+            }
+
+            return true;
         }
 
         public static void ChangePawn(Point position, IFigure figure)
@@ -165,7 +209,18 @@ namespace BusinessLogicLayer.Services
                 board[start.X, start.Y] = null;
                 board[end.X, end.Y].Position = new Point(end.X, end.Y);
 
+                OnFigureMove(board[end.X, end.Y]);
+                
                 WhiteTurn = !WhiteTurn;
+
+                if (ChessGame.IsDraw(end))
+                {
+                    EndGame(GameState.Draw);
+                }
+                if (ChessGame.IsCheck(out Point position) && ChessGame.IsCheckMate(position))
+                {
+                    EndGame((WhiteTurn ? GameState.Black : GameState.White));
+                }
             }
         }
 
