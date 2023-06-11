@@ -44,6 +44,8 @@
   <ItemGroup>
     <Compile Include="Interfaces\IFigure.cs" />
     <Compile Include="Models\Bishop.cs" />
+    <Compile Include="Models\FigureDataModel.cs" />
+    <Compile Include="Models\GameModel.cs" />
     <Compile Include="Models\King.cs" />
     <Compile Include="Models\Knight.cs" />
     <Compile Include="Models\Pawn.cs" />
@@ -52,6 +54,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ChessGame.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\DataLogicLayer\DataLogicLayer.csproj">
+      <Project>{DE5737A3-8767-42AB-94C8-73124247B797}</Project>
+      <Name>DataLogicLayer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

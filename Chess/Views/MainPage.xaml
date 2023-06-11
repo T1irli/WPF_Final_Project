@@ -51,7 +51,8 @@
     
     <Grid Background="#482121" x:Name="settingGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -86,7 +87,14 @@
                 <TextBlock FontSize="36" FontWeight="Medium">Play</TextBlock>
             </Button>
         </Border>
-        <TextBlock Grid.Row="4" Margin="20, 15" FontSize="24" x:Name="rulesTextBlock"
+        <Border Grid.Row="3" Style="{StaticResource Button}" Visibility="Hidden">
+            <Button  Style="{StaticResource noSelectButtonStyle}"
+                    Foreground="White" x:Name="continueButton" BorderThickness="0"
+                    Width="250" Height="60">
+                <TextBlock FontSize="36" FontWeight="Medium">Continue</TextBlock>
+            </Button>
+        </Border>
+        <TextBlock Grid.Row="5" Margin="20, 15" FontSize="24" x:Name="rulesTextBlock"
                        TextAlignment="Center" Style="{StaticResource HighlightedText}"
                        >Read rules</TextBlock>
     </Grid>

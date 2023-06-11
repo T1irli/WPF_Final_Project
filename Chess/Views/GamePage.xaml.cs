@@ -34,10 +34,60 @@ namespace Chess.Views
         public GamePage()
         {
             InitializeComponent();
+            SetTimers();
             ChessGame.BlackKilled += OnBlackKilled;
             ChessGame.WhiteKilled += OnWhiteKilled;
             ChessGame.FigureMoved += ChessGame_FigureMoved;
-            ChessGame.GameStarting += (s, e) => { SetTimers(GameTime); whiteTimer.Start(); };
+            ChessGame.GameStarting += (s, e) => {
+                whiteKilledWrap.Children.Clear();
+                blackKilledWrap.Children.Clear();
+                whiteLogList.Children.Clear();
+                blackLogList.Children.Clear();
+                if (s != null)
+                {
+                    var gm = s as GameModel;
+                    SetAmoutOfTime(ChessGame.WhiteTime, ChessGame.BlackTime);
+                    foreach (var f in gm.WhiteKilled)
+                        OnWhiteKilled(FigureDataModel.ToFigure(f), null);
+                    foreach (var f in gm.BlackKilled)
+                        OnBlackKilled(FigureDataModel.ToFigure(f), null);
+                    bool isWhite = true;
+                    foreach (var log in ChessGame.Logs)
+                    {
+                        StackPanel stackPanel = new StackPanel()
+                        {
+                            Orientation = Orientation.Horizontal,
+                        };
+                        Image image = new Image()
+                        {
+                            Height = 30,
+                            Width = 30,
+                            Margin = new Thickness(5),
+                            Source = new BitmapImage(new Uri($"/Images/{log.Item1}.png", UriKind.Relative)),
+                        };
+                        TextBlock textBlock = new TextBlock()
+                        {
+                            Text = log.Item2,
+                            FontSize = 18,
+                            Foreground = Brushes.White
+                        };
+                        stackPanel.Children.Add(image);
+                        stackPanel.Children.Add(textBlock);
+                        if (isWhite)
+                            whiteLogList.Children.Add(stackPanel);
+                        else blackLogList.Children.Add(stackPanel);
+                        isWhite = !isWhite;
+                    }
+                    logScrollViewer.PageDown();
+                    if (ChessGame.WhiteTurn)
+                        whiteTimer.Start();
+                    else blackTimer.Start();
+                }
+                else {
+                    SetAmoutOfTime(new TimeSpan(0, GameTime, 0), new TimeSpan(0, GameTime, 0));
+                    whiteTimer.Start();
+                }
+            };
             ChessGame.GameEnding += (s, e) =>
             {
                 whiteTimer.Stop();
@@ -45,10 +95,19 @@ namespace Chess.Views
             };
         }
 
-        private void SetTimers(int startTime)
+        private void SetAmoutOfTime(TimeSpan timeWhite, TimeSpan timeBlack)
         {
-            wTimeTextBlock.Text = bTimeTextBlock.Text = $"{GameTime.ToString("D2")}:00";
-            wStartTime = bStartTime = new TimeSpan(0, startTime, 0);
+            wTimeTextBlock.Text = $"{timeWhite.Minutes.ToString("D2")}:{timeWhite.Seconds.ToString("D2")}";
+            bTimeTextBlock.Text = $"{timeBlack.Minutes.ToString("D2")}:{timeBlack.Seconds.ToString("D2")}";
+            wStartTime = timeWhite;
+            bStartTime = timeBlack;
+
+            ChessGame.WhiteTime = timeWhite;
+            ChessGame.BlackTime = timeBlack;
+        }
+
+        private void SetTimers()
+        {
             whiteTimer = new DispatcherTimer(DispatcherPriority.Normal);
             whiteTimer.Interval = TimeSpan.FromSeconds(1);
             whiteTimer.Tick += (s, e) =>
@@ -107,6 +166,11 @@ namespace Chess.Views
                 whiteTimer.Start();
                 blackTimer.Stop();
             }
+            ChessGame.WhiteTime = wStartTime;
+            ChessGame.BlackTime = bStartTime;
+            ChessGame.Logs.Add(Tuple.Create(
+                ChessConverter.ConvertFigureToSource(figure),
+                $"{(char)('a' + figure.Position.X)}{8 - figure.Position.Y}"));
         }
 
         private void OnBlackKilled(object sender, EventArgs e)
@@ -116,7 +180,6 @@ namespace Chess.Views
 
         private void OnWhiteKilled(object sender, EventArgs e)
         {
-            
             whiteKilledWrap.Children.Add(GetKilledFigure(sender));
         }
 

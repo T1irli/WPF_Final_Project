@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessLogicLayer.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,19 +26,32 @@ namespace Chess.Views
         public MainPage()
         {
             InitializeComponent();
-            GameTime = 15;
+            GameTime = Properties.Settings.Default.Time;
+            timeTextBlock.Text = $"{GameTime}";
+
+            if (ChessGame.IsSavedGame)
+            {
+                (continueButton.Parent as Border).Visibility = Visibility.Visible;
+            }
         }
 
         private void upNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             GameTime = Math.Min(GameTime + 5, 30);
-            timeTextBlock.Text = $"{GameTime}";
+            ShowTimeAndSave();
         }
 
         private void downNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             GameTime = Math.Max(GameTime - 5, 5);
+            ShowTimeAndSave();
+        }
+
+        private void ShowTimeAndSave()
+        {
             timeTextBlock.Text = $"{GameTime}";
+            Properties.Settings.Default.Time = (byte)GameTime;
+            Properties.Settings.Default.Save();
         }
     }
 }

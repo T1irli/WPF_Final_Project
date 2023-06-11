@@ -43,6 +43,16 @@ namespace Chess.ViewModels
             });
         }
 
+        public ICommand ContinueGame
+        {
+            get => new RelayCommand(() =>
+            {
+                CurrentPage = gamePage;
+                (mainPage.continueButton.Parent as Border).Visibility = Visibility.Hidden;
+                ChessGame.ContinueGame();
+            });
+        }
+
         public ICommand OpenRules
         {
             get => new RelayCommand(() => {
@@ -54,6 +64,11 @@ namespace Chess.ViewModels
         {
             get => new RelayCommand(() => {
                 CurrentPage = mainPage;
+                if (ChessGame.IsSavedGame)
+                {
+                    (mainPage.continueButton.Parent as Border).Visibility = Visibility.Visible;
+                }
+                else (mainPage.continueButton.Parent as Border).Visibility = Visibility.Hidden;
             });
         }
 
@@ -64,6 +79,7 @@ namespace Chess.ViewModels
             rulesPage = new RulesPage();
 
             mainPage.playButton.Command = StartGame;
+            mainPage.continueButton.Command = ContinueGame;
             mainPage.rulesTextBlock.InputBindings.Add(new MouseBinding() { Command = OpenRules, MouseAction = MouseAction.LeftClick });
             rulesPage.backArrow.InputBindings.Add(new MouseBinding() { Command = GoBack, MouseAction = MouseAction.LeftClick });
             CurrentPage = mainPage;

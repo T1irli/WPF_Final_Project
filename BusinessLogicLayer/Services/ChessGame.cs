@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Net;
+using DataLogicLayer;
+using System.IO;
 
 namespace BusinessLogicLayer.Services
 {
@@ -18,15 +20,30 @@ namespace BusinessLogicLayer.Services
         Draw
     }
 
+    /*
+     TODO
+    Доробити continueGame для GamePage
+     */
+
     public static class ChessGame
     {
         private static IFigure[,] board;
         public static bool WhiteTurn { get; private set; }
+        public static bool IsSavedGame { get => File.Exists(currentGamePath); }
 
         public static List<IFigure> WhiteFigures { get; private set; }
         public static List<IFigure> BlackFigures { get; private set; }
 
+        public static List<Tuple<string, string>> Logs { get; private set; }
+
+        private static List<IFigure> killedWhite;
+        private static List<IFigure> killedBlack;
+
         public static Point? ToweringPos = null;
+        private static string currentGamePath = "current.xml";
+
+        public static TimeSpan WhiteTime { get; set; }
+        public static TimeSpan BlackTime { get; set; }
 
         public static event EventHandler GameStarting;
         public static event EventHandler BlackKilled;
@@ -39,6 +56,7 @@ namespace BusinessLogicLayer.Services
         {
             if (GameEnding != null)
                 GameEnding.Invoke(message, null);
+            File.Delete(currentGamePath);
         }
 
         static ChessGame()
@@ -46,6 +64,9 @@ namespace BusinessLogicLayer.Services
             board = new IFigure[8,8];
             WhiteFigures = new List<IFigure>();
             BlackFigures = new List<IFigure>();
+            killedBlack = new List<IFigure>();
+            killedWhite = new List<IFigure>();
+            Logs = new List<Tuple<string, string>>();
         }
 
         public static void OnFigureMove(IFigure figure)
@@ -108,13 +129,57 @@ namespace BusinessLogicLayer.Services
 
         public static bool CanMove(Point start, Point end) => GetMoves(start).Contains(end) || GetAttacks(start).Contains(end);
 
+        public static void ContinueGame()
+        {
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    board[i, j] = null;
+
+            killedWhite.Clear();
+            killedBlack.Clear();
+            WhiteFigures.Clear();
+            BlackFigures.Clear();
+            Logs.Clear();
+
+            GameModel gameModel = XmlDataBase.Read<GameModel>(currentGamePath);
+            FigureDataModel.ToFigure(gameModel.Figures[0]);
+            foreach (var f in gameModel.Figures)
+                board[f.Position.X, f.Position.Y] = FigureDataModel.ToFigure(f);
+            WhiteTurn = gameModel.WhiteTurn;
+            killedWhite.AddRange(gameModel.WhiteKilled.Select(f => FigureDataModel.ToFigure(f)));
+            killedBlack.AddRange(gameModel.BlackKilled.Select(f => FigureDataModel.ToFigure(f)));
+            for (int i = 0; i < gameModel.LogsImg.Count; i++)
+                Logs.Add(Tuple.Create(gameModel.LogsImg[i], gameModel.LogsPos[i]));
+            WhiteTime = TimeSpan.Parse(gameModel.WhiteTime);
+            BlackTime = TimeSpan.Parse(gameModel.BlackTime);
+
+            File.Delete(currentGamePath);
+
+            foreach (var item in board)
+            {
+                if (item == null) continue;
+                if (item.IsWhite)
+                    WhiteFigures.Add(item);
+                else BlackFigures.Add(item);
+            }
+
+            if (GameStarting != null)
+                GameStarting(gameModel, null);
+        }
+
         public static void StartGame()
         {
-            WhiteTurn = true;
-
-            for(int i = 2; i < 6; i++)
+            for(int i = 0; i < 8; i++)
                 for(int j = 0; j < 8; j++)
                     board[i, j] = null;
+
+            killedWhite.Clear();
+            killedBlack.Clear();
+            WhiteFigures.Clear();
+            BlackFigures.Clear();
+            Logs.Clear();
+
+            WhiteTurn = true;
 
             // Test
             //board[3, 6] = new Pawn() { Position = new Point(3, 6), IsWhite = true };
@@ -194,12 +259,14 @@ namespace BusinessLogicLayer.Services
                     if (board[end.X, end.Y].IsWhite)
                     {
                         WhiteFigures.Remove(board[end.X, end.Y]);
+                        killedWhite.Add(board[end.X, end.Y]);
                         if (WhiteKilled != null)
                             WhiteKilled.Invoke(board[end.X, end.Y], null);
                     }
                     else
                     {
                         BlackFigures.Remove(board[end.X, end.Y]);
+                        killedBlack.Add(board[end.X, end.Y]);
                         if (BlackKilled != null)
                             BlackKilled.Invoke(board[end.X, end.Y], null);
                     }
@@ -212,6 +279,21 @@ namespace BusinessLogicLayer.Services
                 OnFigureMove(board[end.X, end.Y]);
                 
                 WhiteTurn = !WhiteTurn;
+
+                GameModel gameModel = new GameModel()
+                {
+                    WhiteTime = WhiteTime.ToString(),
+                    BlackTime = BlackTime.ToString(),
+                    Figures = WhiteFigures.Select(f => FigureDataModel.ToFigureDataModel(f))
+                    .Concat(BlackFigures.Select(f => FigureDataModel.ToFigureDataModel(f))).ToList(),
+
+                    BlackKilled = killedBlack.Select(f => FigureDataModel.ToFigureDataModel(f)).ToList(),
+                    WhiteKilled = killedWhite.Select(f => FigureDataModel.ToFigureDataModel(f)).ToList(),
+                    LogsImg = Logs.Select(x => x.Item1).ToList(),
+                    LogsPos = Logs.Select(x => x.Item2).ToList(),
+                    WhiteTurn = WhiteTurn
+                };
+                XmlDataBase.Write(currentGamePath, gameModel);
 
                 if (ChessGame.IsDraw(end))
                 {

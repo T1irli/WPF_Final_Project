@@ -35,3 +35,5 @@ E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Views\GamePage.g.cs
 E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Views\GamePage.baml
 E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Views\RulesPage.g.cs
 E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Views\RulesPage.baml
+E:\IT STEP\WPF\ExamProject\Chess\bin\Debug\DataLogicLayer.dll
+E:\IT STEP\WPF\ExamProject\Chess\bin\Debug\DataLogicLayer.pdb

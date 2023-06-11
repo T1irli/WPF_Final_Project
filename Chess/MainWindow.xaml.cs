@@ -39,6 +39,16 @@ namespace Chess
             ChessGame.GameStarting += StartGameCommand;
             ChessGame.BoardSetted += SetBoardForRuls;
             ChessGame.GameEnding += (s, e) => ShowWinner((GameState)s);
+            RestorePosition();
+        }
+
+        private void RestorePosition()
+        {
+            if (Properties.Settings.Default.Position.Height == 0) return;
+            this.Height = Properties.Settings.Default.Position.Height;
+            this.Width = Properties.Settings.Default.Position.Width;
+            this.Top = Properties.Settings.Default.Position.Y;
+            this.Left = Properties.Settings.Default.Position.X;
         }
 
         private void CleanBoard()
@@ -300,6 +310,7 @@ namespace Chess
         private void StartGameCommand(object sender, EventArgs e)
         {
             winnerPanel.Visibility = Visibility.Hidden;
+            CleanBoard();
             SetFigures();
         }
 
@@ -326,6 +337,12 @@ namespace Chess
             winnerPanel.Visibility = Visibility.Hidden;
             CleanBoard();
             (this.DataContext as PageViewModel).GoBack.Execute(null);
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Properties.Settings.Default.Position = this.RestoreBounds;
+            Properties.Settings.Default.Save();
         }
     }
 }
