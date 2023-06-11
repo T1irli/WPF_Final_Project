@@ -1,8 +1,10 @@
 ﻿using BusinessLogicLayer.Services;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,13 +28,23 @@ namespace Chess.Views
         public MainPage()
         {
             InitializeComponent();
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(Properties.Settings.Default.Culture);
             GameTime = Properties.Settings.Default.Time;
             timeTextBlock.Text = $"{GameTime}";
+            UpdateLocalization();
 
             if (ChessGame.IsSavedGame)
             {
                 (continueButton.Parent as Border).Visibility = Visibility.Visible;
             }
+        }
+
+        public void UpdateLocalization()
+        {
+            (playButton.Content as TextBlock).Text = Strings.Play;
+            (continueButton.Content as TextBlock).Text = Strings.Continue;
+            rulesTextBlock.Text = Strings.ReadRules;
+            minutesTextBlock.Text = ' ' + Strings.Minutes;
         }
 
         private void upNum_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

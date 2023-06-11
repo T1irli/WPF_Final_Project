@@ -2,8 +2,10 @@
 using BusinessLogicLayer.Services;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +27,36 @@ namespace Chess.Views
         public RulesPage()
         {
             InitializeComponent();
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(Properties.Settings.Default.Culture);
+            UpdateLocalization();
+        }
+
+        public void UpdateLocalization()
+        {
+            rulesHeader.Text = Strings.RulesHeader;
+            if(rulesHeader.Text == "ПРАВИЛА")
+                rulesHeader.HorizontalAlignment = HorizontalAlignment.Right;
+            else rulesHeader.HorizontalAlignment = HorizontalAlignment.Center;
+            (pawnSP.Children[0] as TextBlock).Text = Strings.Pawn;
+            (pawnSP.Children[1] as TextBlock).Text = Strings.PawnContent;
+
+            (knightSP.Children[0] as TextBlock).Text = Strings.Knight;
+            (knightSP.Children[1] as TextBlock).Text = Strings.KnightContent;
+
+            (bishopSP.Children[0] as TextBlock).Text = Strings.Bishop;
+            (bishopSP.Children[1] as TextBlock).Text = Strings.BishopContent;
+
+            (rookSP.Children[0] as TextBlock).Text = Strings.Tower;
+            (rookSP.Children[1] as TextBlock).Text = Strings.TowerContent;
+
+            (queenSP.Children[0] as TextBlock).Text = Strings.Queen;
+            (queenSP.Children[1] as TextBlock).Text = Strings.QueenContent;
+
+            (kingSP.Children[0] as TextBlock).Text = Strings.King;
+            (kingSP.Children[1] as TextBlock).Text = Strings.KingContent;
+
+            (pawnPromSP.Children[0] as TextBlock).Text = Strings.PawnPromotion;
+            (pawnPromSP.Children[1] as TextBlock).Text = Strings.PPContent;
         }
 
         private void Pawn_MouseEnter(object sender, MouseEventArgs e)

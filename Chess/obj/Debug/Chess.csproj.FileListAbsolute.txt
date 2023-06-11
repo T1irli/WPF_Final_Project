@@ -37,3 +37,7 @@ E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Views\RulesPage.g.cs
 E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Views\RulesPage.baml
 E:\IT STEP\WPF\ExamProject\Chess\bin\Debug\DataLogicLayer.dll
 E:\IT STEP\WPF\ExamProject\Chess\bin\Debug\DataLogicLayer.pdb
+E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Chess.Strings.resources
+E:\IT STEP\WPF\ExamProject\Chess\bin\Debug\uk\Chess.resources.dll
+E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\Chess.Strings.uk.resources
+E:\IT STEP\WPF\ExamProject\Chess\obj\Debug\uk\Chess.resources.dll

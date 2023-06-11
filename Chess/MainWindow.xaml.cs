@@ -5,6 +5,7 @@ using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -192,17 +193,17 @@ namespace Chess
             Panel.SetZIndex(winnerPanel, 1);
             if (state == GameState.Draw)
             {
-                winText.Text = "Draw";
+                winText.Text = Strings.Draw;
                 winImg.Source = new BitmapImage(new Uri("/Images/drawFigure.png", UriKind.Relative));
             }
             else if (state == GameState.White)
             {
-                winText.Text = "White player wins!";
+                winText.Text = Strings.WhiteWin;
                 winImg.Source = new BitmapImage(new Uri("/Images/whiteFigure.png", UriKind.Relative));
             }
             else if (state == GameState.Black)
             {
-                winText.Text = "Black player wins!";
+                winText.Text = Strings.BlackWin;
                 winImg.Source = new BitmapImage(new Uri("/Images/blackFigure.png", UriKind.Relative));
             }
 
